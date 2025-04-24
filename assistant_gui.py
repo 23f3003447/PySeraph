@@ -14,7 +14,6 @@ class AssistantApp(ctk.CTk):
         self.geometry("600x400")
         self.resizable(False, False)
 
-        # Sarcastic welcome messages
         welcome_messages = [
             "Oh great, you're back. Let's do this.",
             "Wow, you again? Fine, I'm ready.",
@@ -88,7 +87,6 @@ class AssistantApp(ctk.CTk):
             if command:
                 self.display_output("You", command)
                 try:
-                    # Patch speak, print, and input
                     original_speak = speak
                     original_print = print
                     original_input = input
@@ -116,7 +114,6 @@ class AssistantApp(ctk.CTk):
 
                     execute_command(command)
 
-                    # Revert
                     builtins.print = original_print
                     builtins.input = original_input
                     globals()['speak'] = original_speak

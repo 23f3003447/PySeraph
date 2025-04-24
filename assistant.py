@@ -18,12 +18,10 @@ engine = pyttsx3.init()
 DEEPSEEK_API_KEY = "your_deepseek_api_key"
 DEEPSEEK_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# 🔊 Speak
 def speak(text):
     engine.say(text)
     engine.runAndWait()
 
-# 🎤 Listen
 def listen():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
@@ -40,7 +38,7 @@ def listen():
             speak("Error connecting to speech service.")
         return None
 
-# 💬 DeepSeek AI Chat
+# DeepSeek AI Chat
 def deepseek_chat(query):
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
@@ -56,7 +54,6 @@ def deepseek_chat(query):
     except Exception as e:
         return f"DeepSeek AI error: {e}"
 
-# 📧 Send Email
 def send_email(recipient, subject, body):
     sender_email = "pyseraphai@gmail.com"
     sender_password = "tpmp qotf wevy onih"
@@ -72,7 +69,6 @@ def send_email(recipient, subject, body):
 
     speak("Email has been sent successfully.")
 
-# 🎵 Open Music, YouTube, Instagram
 def play_music():
     webbrowser.open("https://open.spotify.com")
 
@@ -82,7 +78,6 @@ def open_youtube():
 def open_instagram():
     webbrowser.open("https://www.instagram.com")
 
-# 📂 File Management
 def file_manager(command):
     if "new file" in command:
         file_name = input("Enter file name (with extension): ")
@@ -108,7 +103,6 @@ def file_manager(command):
         else:
             speak("Folder does not exist.")
 
-# 📊 Generate PPT
 def generate_ppt(topic):
     prs = Presentation()
     slide_layout = prs.slide_layouts[1]
@@ -120,7 +114,6 @@ def generate_ppt(topic):
     prs.save(f"{topic}.pptx")
     speak(f"PowerPoint presentation '{topic}.pptx' created.")
 
-# 📄 Generate PDF
 def generate_pdf(content):
     pdf = FPDF()
     pdf.add_page()
@@ -129,7 +122,6 @@ def generate_pdf(content):
     pdf.output("generated_document.pdf")
     speak("PDF has been generated successfully.")
 
-# 🌤 Get Weather
 def get_weather(city="Mumbai"):
     api_key = "d26414e38d187576566cfbf22cd58b9e"
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
@@ -146,7 +138,6 @@ def get_weather(city="Mumbai"):
     except Exception as e:
         return f"Weather error: {e}"
 
-# 🔢 Get News
 def get_news():
     api_key = "62ac0d8f472d433998615b2612a221cf"
     url = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={api_key}"
@@ -165,8 +156,6 @@ def get_news():
     else:
         speak("Sorry, I couldn't fetch the news.")
 
-
-# 🧐 Command Execution
 def execute_command(command):
     if "time" in command:
         time_now = datetime.datetime.now().strftime("%I:%M %p")
@@ -211,7 +200,6 @@ def execute_command(command):
     else:
         speak("Sorry, I didn't understand that command.")
 
-# 🔁 Main Loop
 if __name__ == "__main__":
     speak("Hello! PySeraph here. How can I help you?")
     while True:

@@ -6,7 +6,6 @@ import customtkinter as ctk
 from PIL import Image, ImageTk
 from tkinter import messagebox
 
-# Database Connection
 conn = mysql.connector.connect(
     host="localhost",
     user="root",  
@@ -18,12 +17,11 @@ cursor = conn.cursor()
 # Generate OTP
 otp = str(random.randint(100000, 999999))
 
-# Function to send OTP via email
 def send_otp():
     global otp
     email = entry_email.get()
     sender_email = "pyseraphai@gmail.com"
-    sender_password = "tpmp qotf wevy onih"  # Use an App Password for Gmail
+    sender_password = "tpmp qotf wevy onih"  
 
     message = f"Subject: Your OTP Code\n\nYour OTP is {otp}. It expires in 5 minutes."
 
@@ -37,20 +35,18 @@ def send_otp():
     except Exception as e:
         messagebox.showerror("Error", f"Failed to send OTP: {str(e)}")
 
-# Function to verify OTP and store user data
 def verify_otp():
     if entry_otp.get() == otp:
         username = entry_username.get()
         email = entry_email.get()
         password = entry_password.get()
         
-        # Save user data to MySQL
         try:
             cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", (username, email, password))
             conn.commit()
             messagebox.showinfo("Success", "Registration Successful! Redirecting to login...")
-            root.destroy()  # Close registration window
-            os.system("python \"D:\\Frontend\\PySeraph\\PySeraph\\assistant.py\"")  # ✅ Open login page
+            root.destroy()  
+            os.system("python \"D:\\Frontend\\PySeraph\\PySeraph\\assistant.py\"") 
         except Exception as e:
             messagebox.showerror("Error", f"Database error: {str(e)}")
     else:
@@ -63,7 +59,6 @@ root = ctk.CTk()
 root.title("Registration Page")
 root.geometry("500x400")
 
-# Load Background
 script_dir = os.path.dirname(os.path.abspath(__file__))
 bg_path = os.path.join(script_dir, "bg.jpg")
 bg_image = Image.open(bg_path)
@@ -74,7 +69,6 @@ bg_photo = ImageTk.PhotoImage(bg_image)
 bg_label = ctk.CTkLabel(root, image=bg_photo, text="")
 bg_label.place(relwidth=1, relheight=1)
 
-# Floating Input Fields
 entry_username = ctk.CTkEntry(root, width=250, fg_color="transparent", border_color="white", border_width=2, placeholder_text="Username")
 entry_username.place(relx=0.5, rely=0.3, anchor="center")
 
@@ -84,7 +78,6 @@ entry_email.place(relx=0.5, rely=0.4, anchor="center")
 entry_password = ctk.CTkEntry(root, width=250, fg_color="transparent", border_color="white", border_width=2, show="*", placeholder_text="Password")
 entry_password.place(relx=0.5, rely=0.5, anchor="center")
 
-# OTP Field & Buttons
 entry_otp = ctk.CTkEntry(root, width=150, fg_color="transparent", border_color="white", border_width=2, placeholder_text="Enter OTP")
 entry_otp.place(relx=0.5, rely=0.6, anchor="center")
 
