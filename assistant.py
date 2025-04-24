@@ -2,171 +2,216 @@ import speech_recognition as sr
 import pyttsx3
 import datetime
 import webbrowser
-import subprocess
-import requests
 import os
 import shutil
+import smtplib
+import requests
 import json
+from email.message import EmailMessage
 from pptx import Presentation
 from fpdf import FPDF
-from email.message import EmailMessage
-import smtplib
 
-# Initialize Text-to-Speech engine
+# Initialize Text-to-Speech
 engine = pyttsx3.init()
 
-# DeepSeek API Configuration
-DEEPSEEK_API_KEY = "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"
+# DeepSeek API via OpenRouter
+DEEPSEEK_API_KEY = "your_deepseek_api_key"
+DEEPSEEK_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Function to interact with DeepSeek AI
-def ai_chat(query):
-    url = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "model": "deepseek/deepseek-v3-base:free",
-        "messages": [{"role": "user", "content": query}]
-    }
-
-    response = requests.post(url, headers=headers, json=data)
-
-    if response.status_code == 200:
-        try:
-            return response.json()["choices"][0]["message"]["content"]
-        except KeyError:
-            return "Error: Unexpected API response format."
-    else:
-        return f"Error: {response.status_code} - {response.text}"
-
-
-# Function to send email securely
-def send_email(recipient, subject, body):
-    sender_email = os.getenv("EMAIL_USER")
-    sender_password = os.getenv("EMAIL_PASS")
-
-    if not sender_email or not sender_password:
-        speak("Email credentials are missing!")
-        return
-
-    msg = EmailMessage()
-    msg['From'] = sender_email
-    msg['To'] = recipient
-    msg['Subject'] = subject
-    msg.set_content(body)
-
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender_email, sender_password)
-            server.send_message(msg)
-        speak("Email has been sent successfully.")
-    except Exception as e:
-        speak(f"Failed to send email: {e}")
-
-
-# Function to generate PowerPoint presentations
-def create_ppt():
-    prs = Presentation()
-    slide_layout = prs.slide_layouts[1]
-    slide = prs.slides.add_slide(slide_layout)
-    title = slide.shapes.title
-    subtitle = slide.placeholders[1]
-
-    title.text = "Automated PPT"
-    subtitle.text = "Created by PySeraph AI Assistant"
-
-    prs.save("Generated_Presentation.pptx")
-    speak("PowerPoint presentation created successfully.")
-
-
-# Function to generate PDF
-def create_pdf():
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Automated PDF", ln=True, align='C')
-
-    pdf.output("Generated_Document.pdf")
-    speak("PDF file created successfully.")
-
-
-# Speech Functions
+# 🔊 Speak
 def speak(text):
     engine.say(text)
     engine.runAndWait()
 
-
+# 🎤 Listen
 def listen():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
         print("🎤 Listening...")
         recognizer.adjust_for_ambient_noise(source)
         try:
-            audio = recognizer.listen(source, timeout=10)
+            audio = recognizer.listen(source)
             command = recognizer.recognize_google(audio).lower()
             print(f"User said: {command}")
             return command
-        except sr.WaitTimeoutError:
-            speak("I didn't hear anything. Please try again.")
-            return None
         except sr.UnknownValueError:
             speak("Sorry, I couldn't understand.")
-            return None
         except sr.RequestError:
-            speak("Error connecting to speech recognition service.")
-            return None
+            speak("Error connecting to speech service.")
+        return None
+
+# 💬 DeepSeek AI Chat
+def deepseek_chat(query):
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "deepseek/deepseek-chat",
+        "messages": [{"role": "user", "content": query}]
+    }
+    try:
+        response = requests.post(DEEPSEEK_URL, headers=headers, json=data)
+        return response.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"DeepSeek AI error: {e}"
+
+# 📧 Send Email
+def send_email(recipient, subject, body):
+    sender_email = "pyseraphai@gmail.com"
+    sender_password = "tpmp qotf wevy onih"
+    msg = EmailMessage()
+    msg['From'] = sender_email
+    msg['To'] = recipient
+    msg['Subject'] = subject
+    msg.set_content(body)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+
+    speak("Email has been sent successfully.")
+
+# 🎵 Open Music, YouTube, Instagram
+def play_music():
+    webbrowser.open("https://open.spotify.com")
+
+def open_youtube():
+    webbrowser.open("https://www.youtube.com")
+
+def open_instagram():
+    webbrowser.open("https://www.instagram.com")
+
+# 📂 File Management
+def file_manager(command):
+    if "new file" in command:
+        file_name = input("Enter file name (with extension): ")
+        with open(file_name, "w") as file:
+            file.write("")
+        speak(f"File {file_name} has been created.")
+    elif "delete file" in command:
+        file_name = input("Enter file name to delete: ")
+        if os.path.exists(file_name):
+            os.remove(file_name)
+            speak(f"File {file_name} has been deleted.")
+        else:
+            speak("File does not exist.")
+    elif "create folder" in command:
+        folder_name = input("Enter folder name: ")
+        os.makedirs(folder_name, exist_ok=True)
+        speak(f"Folder {folder_name} has been created.")
+    elif "delete folder" in command:
+        folder_name = input("Enter folder name to delete: ")
+        if os.path.exists(folder_name):
+            shutil.rmtree(folder_name)
+            speak(f"Folder {folder_name} has been deleted.")
+        else:
+            speak("Folder does not exist.")
+
+# 📊 Generate PPT
+def generate_ppt(topic):
+    prs = Presentation()
+    slide_layout = prs.slide_layouts[1]
+    slide = prs.slides.add_slide(slide_layout)
+    title = slide.shapes.title
+    content = slide.placeholders[1]
+    title.text = topic
+    content.text = "This is an auto-generated slide."
+    prs.save(f"{topic}.pptx")
+    speak(f"PowerPoint presentation '{topic}.pptx' created.")
+
+# 📄 Generate PDF
+def generate_pdf(content):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(200, 10, txt=content)
+    pdf.output("generated_document.pdf")
+    speak("PDF has been generated successfully.")
+
+# 🌤 Get Weather
+def get_weather(city="Mumbai"):
+    api_key = "d26414e38d187576566cfbf22cd58b9e"
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        print(json.dumps(data, indent=4))  # <-- JSON response shown here
+        if response.status_code == 200 and data.get("cod") == 200:
+            temp = data["main"]["temp"]
+            desc = data["weather"][0]["description"]
+            return f"The current temperature in {city} is {temp}°C with {desc}."
+        else:
+            return f"Error: {data.get('message', 'City not found')}"
+    except Exception as e:
+        return f"Weather error: {e}"
+
+# 🔢 Get News
+def get_news():
+    api_key = "62ac0d8f472d433998615b2612a221cf"
+    url = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={api_key}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        news_data = response.json()
+        articles = news_data.get("articles", [])[:5]
+        if articles:
+            speak("Here are the top news headlines:")
+            for article in articles:
+                print(article['title'])
+                speak(article['title'])
+        else:
+            speak("No news articles found.")
+    else:
+        speak("Sorry, I couldn't fetch the news.")
 
 
+# 🧐 Command Execution
 def execute_command(command):
-    if not command:
-        return
-
     if "time" in command:
-        current_time = datetime.datetime.now().strftime("%I:%M %p")
-        speak(f"The time is {current_time}")
-
+        time_now = datetime.datetime.now().strftime("%I:%M %p")
+        speak(f"The time is {time_now}")
     elif "search" in command:
-        search_query = command.replace("search", "").strip()
-        url = f"https://www.google.com/search?q={search_query}"
-        speak(f"Searching for {search_query}")
+        query = command.replace("search", "").strip()
+        url = f"https://www.google.com/search?q={query}"
         webbrowser.open(url)
-
     elif "chat" in command:
         query = command.replace("chat", "").strip()
-        response = ai_chat(query)
-        print(f"AI Response: {response}")  # Displays response as text
-        speak(response)  # Speaks the response
-
-
-    elif "send email" in command:
+        response = deepseek_chat(query)
+        speak(response)
+    elif "email" in command:
         recipient = input("Enter recipient email: ")
         subject = input("Enter subject: ")
         body = input("Enter message: ")
         send_email(recipient, subject, body)
-
-    elif "create ppt" in command:
-        create_ppt()
-
-    elif "create pdf" in command:
-        create_pdf()
-
+    elif "play music" in command:
+        play_music()
     elif "open youtube" in command:
-        webbrowser.open("https://www.youtube.com")
-        speak("Opening YouTube.")
-
+        open_youtube()
     elif "open instagram" in command:
-        webbrowser.open("https://www.instagram.com")
-        speak("Opening Instagram.")
-
+        open_instagram()
+    elif "file" in command:
+        file_manager(command)
+    elif "generate ppt" in command:
+        topic = input("Enter topic: ")
+        generate_ppt(topic)
+    elif "generate pdf" in command:
+        content = input("Enter content: ")
+        generate_pdf(content)
+    elif "weather" in command:
+        city = input("Enter city: ")
+        report = get_weather(city)
+        speak(report)
+    elif "news" in command:
+        news = get_news()
+        speak(news)
     elif "exit" in command or "quit" in command:
         speak("Goodbye! Have a great day.")
         exit()
-
     else:
-        speak("I'm sorry, I don't understand that command.")
+        speak("Sorry, I didn't understand that command.")
 
-
+# 🔁 Main Loop
 if __name__ == "__main__":
     speak("Hello! PySeraph here. How can I help you?")
     while True:
