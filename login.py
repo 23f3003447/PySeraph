@@ -33,7 +33,7 @@ def login():
         if user:
             messagebox.showinfo("Login Successful", f"Welcome, {username}!")
             root.destroy()  # Close login window after success
-            os.system("python \"D:\\Frontend\\PySeraph\\PySeraph\\assistant.py\"") # 🔹Launch PySeraph 
+            os.system("python \"D:\\Frontend\\PySeraph\\assistant_gui.py\"") # 🔹Launch PySeraph 
         else:
             messagebox.showerror("Login Failed", "Invalid credentials!")
 
