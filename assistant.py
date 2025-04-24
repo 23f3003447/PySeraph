@@ -15,7 +15,7 @@ from fpdf import FPDF
 engine = pyttsx3.init()
 
 # DeepSeek API via OpenRouter
-DEEPSEEK_API_KEY = "your_deepseek_api_key"
+DEEPSEEK_API_KEY = "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"
 DEEPSEEK_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 def speak(text):
