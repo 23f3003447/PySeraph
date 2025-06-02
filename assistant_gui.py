@@ -4,7 +4,7 @@ import builtins
 import random
 from assistant import speak, listen, execute_command
 
-ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("dark") 
 
 class AssistantApp(ctk.CTk):
     def __init__(self):
