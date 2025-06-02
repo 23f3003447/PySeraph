@@ -1,0 +1,5 @@
+/venv
+.env
+/User\ data
+/client/__pycache__
+/__pycache__
